@@ -1,0 +1,14 @@
+dataset:
+  labels: datasets/covid19china/labels.txt
+  test: datasets/covid19china/valid/test_ids.txt
+general:
+  gpu: 0
+  mode: eval
+  num_workers: 4
+  path: RUNS/0p1_100elr4/Flip/covid19china/unetplusplus/timm-regnetx_002/train_covid19china_unetplusplus_timm-regnetx_002_fold3_flip_2021-08-24_11:25:57.818407
+model:
+  batch_size: 8
+  encoder: timm-regnetx_002
+  height: 256
+  type: last
+  width: 256
