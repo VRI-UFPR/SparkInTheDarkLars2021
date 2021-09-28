@@ -2,7 +2,7 @@
 
 pip install -r requirements.txt
 
-copy the files inside the script_segtool to the utils folders inside the lib/python3.6/site-packages/segmentation_models_pytorch folder
+copy the files inside the scripts to the utils folders inside the lib/python3.6/site-packages/segmentation_models_pytorch folder
 
 # Dataset
 
