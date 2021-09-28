@@ -8,10 +8,8 @@ copy the files inside the script_segtool to the utils folders inside the lib/pyt
 
 setup a txt file with the images paths
 
-path/to/image1.jpg path/to/mask1.png
-
-path/to/image2.jpg path/to/mask2.png
-
+path/to/image1.jpg path/to/mask1.png <br>
+path/to/image2.jpg path/to/mask2.png <br>
 path/to/image3.jpg path/to/mask3.png
 
 setup the config file following the examples in the config folder
