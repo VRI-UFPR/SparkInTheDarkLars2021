@@ -1,0 +1,22 @@
+augmentation:
+  augmentation_prob: 0.2
+  augmentations:
+  - flip
+dataset:
+  labels: datasets/ricord1a/labels.txt
+  train: datasets/ricord1a/train/train_ids1.txt
+  valid: datasets/ricord1a/train/valid_ids1.txt
+general:
+  dataset: ricord1a
+  experiment: Flip
+  gpu: 0
+  mode: train
+  num_workers: 4
+model:
+  batch_size: 8
+  decoder: unetplusplus
+  encoder: timm-regnetx_002
+  height: 256
+  learning_rate: 0.0001
+  num_epochs: 100
+  width: 256
