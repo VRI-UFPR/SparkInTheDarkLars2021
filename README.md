@@ -23,7 +23,7 @@
 path/to/image2.jpg path/to/mask2.png <br>
 path/to/image3.jpg path/to/mask3.png</p>
 
-<p>or just the images path for tests</p>
+<p>or just the images paths for tests</p>
 <p>path/to/image1.jpg<br>
 path/to/image2.jpg<br>
 path/to/image3.jpg</p>
