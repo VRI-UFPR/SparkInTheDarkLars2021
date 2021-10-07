@@ -21,18 +21,23 @@ from torch.utils.data import Dataset as BaseDataset
 ############################## DATASET ##############################
 class Dataset(BaseDataset):
     
-    def __init__(self, ids, num_classes, augmentation=None, preprocessing=None, mode=None):
+    def __init__(self, ids, num_classes, have_mask=True, augmentation=None, preprocessing=None, mode=None):
         
         with open(ids, 'r') as ids_file:
             self.ids = ids_file.read().splitlines()
         
         self.images = []
         self.masks = []
+        self.have_mask = have_mask
 
-        for idx in self.ids:
-            image_path, mask_path = idx.split(' ')
-            self.images.append(image_path)
-            self.masks.append(mask_path)
+        if self.have_mask:
+            for idx in self.ids:
+                image_path, mask_path = idx.split(' ')
+                self.images.append(image_path)
+                self.masks.append(mask_path)
+        else:
+            for idx in self.ids:
+                self.images.append(idx)
 
         self.num_classes = num_classes
         self.augmentation = augmentation
@@ -42,18 +47,21 @@ class Dataset(BaseDataset):
     def __getitem__(self, i):
         
         image_path = self.images[i]
-        mask_path = self.masks[i]
-        #print(image_path)
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        mask = cv2.imread(mask_path, 0)
+        #print(image)        
+        if self.have_mask:
+            mask_path = self.masks[i]      
+            mask = cv2.imread(mask_path, 0)
         
-        height = mask.shape[0]
-        width = mask.shape[1]
+        height = image.shape[0]
+        width = image.shape[1]
     
         masks = np.zeros((height, width, self.num_classes))
-        for i, unique_value in enumerate(np.unique(mask)):
-            masks[:, :, unique_value][mask == unique_value] = 1
+
+        if self.have_mask:
+            for i, unique_value in enumerate(np.unique(mask)):
+                masks[:, :, unique_value][mask == unique_value] = 1
                 
         if self.augmentation:
             sample = self.augmentation(image=image, mask=masks)
@@ -63,8 +71,10 @@ class Dataset(BaseDataset):
             sample = self.preprocessing(image=image, mask=masks)
             image, masks = sample['image'], sample['mask']
 
-        if self.mode == 'test':
+        if self.mode == 'eval':
             return image, masks, image_path, mask_path
+        elif self.mode == 'test':
+            return image, masks, image_path
         return image, masks
     
     def __len__(self):
@@ -328,7 +338,7 @@ if __name__ == '__main__':
             with open(out_dir + '/train_logs.json', 'w') as log_file:
                 json.dump(logs, log_file, indent=4)
         
-            if i > 0 and (i % 25 == 0):
+            if i > 0 and (i % 20 == 0):
                 print('Learning rate decreased!')
                 optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 10
                 #torch.save(model, '{}/epoch{}.pth'.format(checkpoints, i))
@@ -351,7 +361,7 @@ if __name__ == '__main__':
         os.mkdir(masks_path)
         os.mkdir(images_path)
         
-        model_path = project_path + '/checkpoints/' + configs['model']['type'] + '.pth'
+        model_path = project_path + '/checkpoints/last.pth'
 
         model = torch.load(model_path)
 
@@ -375,7 +385,7 @@ if __name__ == '__main__':
         individual_test_logs['Time'] = test_time
         logs['test'].append(individual_test_logs)
 
-        with open(project_path + '/test_logs_' + configs['model']['type'] + '.json', 'w') as log_file:
+        with open(project_path + '/test_logs_last.json', 'w') as log_file:
             json.dump(logs, log_file, indent=4)
             
         colors = []
@@ -395,7 +405,7 @@ if __name__ == '__main__':
 
         test_dataset = Dataset(configs['dataset']['test'], num_classes,
                                augmentation=get_validation_augmentation(resize_height, resize_width),
-                               preprocessing=get_preprocessing(preprocessing_fn), mode='test')
+                               preprocessing=get_preprocessing(preprocessing_fn), mode='eval')
 
         final_iou = 0
         final_fscore = 0
@@ -404,10 +414,10 @@ if __name__ == '__main__':
         fscore_list = []
         for i in trange(len(test_dataset)):
             image, gt_mask, image_path, mask_path = test_dataset[i]
-                        
             idx = image_path.replace('.jpg','').split('/')[-1]
             
             x_tensor = torch.from_numpy(image).to(device).unsqueeze(0)
+            #print(x_tensor)
             pr_masks = model.predict(x_tensor)
             
             pr_masks_individual = (pr_masks.squeeze().cpu().numpy())
@@ -415,7 +425,6 @@ if __name__ == '__main__':
             eps=1e-7
             ious = [0.0] * num_classes
             scores = [0.0] * num_classes
-            #print(num_classes)
             for i, pr, gt in zip(range(num_classes), pr_masks_individual, gt_mask):
                 
                 intersection = np.sum(pr * gt)
@@ -429,9 +438,6 @@ if __name__ == '__main__':
                 score = tp / ((tp + ((fp + fn) / 2)) + eps)
                 scores[i] += score
             
-            #final_iou += sum(ious) / len(ious)
-            #final_fscore += sum(scores) / len(scores)
-
             iou_list.append(sum(ious) / len(ious))
             fscore_list.append(sum(scores) / len(scores))
             
@@ -496,5 +502,113 @@ if __name__ == '__main__':
         final_iou /= len(test_dataset)
         final_fscore /= len(test_dataset)
         
-        with open(project_path + '/individual_logs_' + configs['model']['type'] + '.json', 'w') as log_file:
+        with open(project_path + '/individual_logs_last.json', 'w') as log_file:
             json.dump(t_results, log_file, indent=4)
+    
+    #============================== TEST ==============================#
+    elif configs['general']['mode'] == 'test':
+
+        colors = []
+        colors_path = 'colors.txt'
+        with open(colors_path, 'r') as colors_file:
+            colors = colors_file.read().splitlines()
+
+        colors_str = colors[0:num_classes]
+    
+        colors = []
+        for c in colors_str:
+            color = []
+            c = c.split(',')
+            for item in c:
+                color.append(int(item))
+            colors.append(color)
+
+        project_path = configs['general']['path']
+        test_path = configs['dataset']['test_path']
+
+        masks_path = test_path + '/predicted_masks'
+        images_path = test_path + '/segmented_images'
+
+        if os.path.isdir(masks_path):
+            shutil.rmtree(masks_path)
+
+        if os.path.isdir(images_path):
+            shutil.rmtree(images_path)
+
+        os.mkdir(masks_path)
+        os.mkdir(images_path)
+        
+        model_path = project_path + '/checkpoints/last.pth'
+
+        model = torch.load(model_path)
+
+        test_dataset = Dataset(configs['dataset']['test'], num_classes,
+                               augmentation=get_validation_augmentation(resize_height, resize_width),
+                               preprocessing=get_preprocessing(preprocessing_fn), mode='test', have_mask=False)
+
+        for i in trange(len(test_dataset)):
+            image, _, image_path = test_dataset[i]
+            #print(image_path)
+            #print(image.shape)
+                        
+            idx = image_path.replace('.jpg','').replace('.png','').split('/')[-1]
+            
+            x_tensor = torch.from_numpy(image).to(device).unsqueeze(0)
+            #print(x_tensor)
+            pr_masks = model.predict(x_tensor)
+            
+            pr_masks = torch.argmax(pr_masks, dim=1)
+            pr_masks = (pr_masks.squeeze().cpu().numpy())
+
+            original_image = cv2.imread(image_path)
+            original_height, original_width, _ = original_image.shape
+
+            if (resize_height > resize_width):
+                max_size = resize_height
+            else:
+                max_size = resize_width
+
+            transform = albu.LongestMaxSize(max_size, interpolation=cv2.INTER_NEAREST, p=1)
+            image = transform(image=original_image)['image']
+            
+            image_height, image_width, _ = image.shape
+            transform = albu.CenterCrop(height=image_height, width=image_width, p=1)
+            pr_masks = transform(image=pr_masks)['image']
+
+            if (original_height > original_width):
+                max_size = original_height
+            else:
+                max_size = original_width
+
+            transform = albu.LongestMaxSize(max_size, interpolation=cv2.INTER_NEAREST, p=1)
+            pr_masks = transform(image=pr_masks)['image']
+            
+            mask_height, mask_width = pr_masks.shape
+            
+            if mask_width < original_width:
+                transform = albu.Resize(height=original_height,width=original_width, interpolation=cv2.INTER_NEAREST, p=1)
+                pr_masks = transform(image=pr_masks)['image']
+            
+            elif mask_width > original_width:
+                transform = albu.CenterCrop(height=original_height,width=original_width, p=1)
+                pr_masks = transform(image=pr_masks)['image']
+            
+            mask_height, mask_width = pr_masks.shape
+            final_mask = np.zeros((mask_height, mask_width, 3))
+            final_mask[:,:,0] = pr_masks
+            final_mask[:,:,1] = pr_masks
+            final_mask[:,:,2] = pr_masks
+            
+            for i, unique_value in enumerate(np.unique(pr_masks)):
+                final_mask = np.where(final_mask == [unique_value, unique_value, unique_value], colors[unique_value], final_mask)
+            
+            image = original_image.astype('float32')
+            final_mask = final_mask.astype('float32')
+
+            pred_image = cv2.addWeighted(image, 0.9, final_mask, 0.8, 0.0)
+
+            image_path = images_path + '/{}.jpg'.format(idx)
+            mask_path = masks_path + '/{}.png'.format(idx)
+            
+            cv2.imwrite(image_path, pred_image)
+            cv2.imwrite(mask_path, final_mask)
