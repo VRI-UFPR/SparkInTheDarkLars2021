@@ -15,7 +15,7 @@
 
 <p>Copy the files inside the scripts to the utils folders inside the lib/python3.6/site-packages/segmentation_models_pytorch folder</p>
 
-<h2>Dataset></h2>
+<h2>Dataset:</h2>
 
 <p>Setup a txt file with the images paths as follows for training and validation:</p>
 
