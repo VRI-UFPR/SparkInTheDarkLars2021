@@ -7,7 +7,7 @@
     <img src='images/img4.jpg' style="width:24%;">
 </div>
 
-<h2>See the implementation and the available networks in: <a href="https://github.com/qubvel/segmentation_models.pytorch">Segmentation Models</a></h2>
+<h2>See the implementation and the available networks in: <a href="https://github.com/qubvel/segmentation_models.pytorch" target="_blank">Segmentation Models</a></h2>
 
 <h2>Installation:</h2>
 
