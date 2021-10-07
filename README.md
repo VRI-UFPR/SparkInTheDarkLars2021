@@ -1,9 +1,11 @@
 <h1>Spark in the Dark: Evaluating Encoder-Decoder Pairs for COVID-19 CT's Semantic Segmentation</h1>
 
-<img src='images/img1.jpg' style="width:20%;">
-<img src='images/img2.jpg' style="width:20%;">
-<img src='images/img3.jpg' style="width:20%;">
-<img src='images/img4.jpg' style="width:20%;">
+<div style="display:flex;">
+    <img src='images/img1.jpg' style="width:20%;flex:24%">
+    <img src='images/img2.jpg' style="width:20%;flex:24%">
+    <img src='images/img3.jpg' style="width:20%;flex:24%">
+    <img src='images/img4.jpg' style="width:20%;flex:24%">
+</div>
 
 <h2>See the implementation and the available networks in: <a href="https://github.com/qubvel/segmentation_models.pytorch">Segmentation Models</a></h2>
 
