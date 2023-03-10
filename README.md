@@ -34,6 +34,7 @@ path/to/image3.jpg</p>
 <p>python main.py --configs config_file.yml</p>
 
 <h2>Citation</h2>
+
 ```
 @inproceedings{9605461,
   author={Krinski, Bruno A. and Ruiz, Daniel V. and Todt, Eduardo},
@@ -44,5 +45,22 @@ path/to/image3.jpg</p>
   number={},
   pages={198-203},
   doi={10.1109/LARS/SBR/WRE54079.2021.9605461}
+}
+```
+
+```
+@inproceedings{sbcas,
+ author = {Bruno Krinski and Daniel Ruiz and Eduardo Todt},
+ title = {Light In The Black: An Evaluation of Data Augmentation Techniques for COVID-19 CT’s Semantic Segmentation},
+ booktitle = {Anais do XXII Simpósio Brasileiro de Computação Aplicada à Saúde},
+ location = {Teresina},
+ year = {2022},
+ keywords = {},
+ issn = {2763-8952},
+ pages = {156--167},
+ publisher = {SBC},
+ address = {Porto Alegre, RS, Brasil},
+ doi = {10.5753/sbcas.2022.222495},
+ url = {https://sol.sbc.org.br/index.php/sbcas/article/view/21628}
 }
 ```
