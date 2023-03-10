@@ -35,7 +35,7 @@ path/to/image3.jpg</p>
 
 <h2>Citation</h2>
 ```
-@INPROCEEDINGS{9605461,
+@inproceedings{9605461,
   author={Krinski, Bruno A. and Ruiz, Daniel V. and Todt, Eduardo},
   booktitle={2021 Latin American Robotics Symposium (LARS), 2021 Brazilian Symposium on Robotics (SBR), and 2021 Workshop on Robotics in Education (WRE)}, 
   title={Spark in the Dark: Evaluating Encoder-Decoder Pairs for COVID-19 CT’s Semantic Segmentation}, 
@@ -43,7 +43,8 @@ path/to/image3.jpg</p>
   volume={},
   number={},
   pages={198-203},
-  doi={10.1109/LARS/SBR/WRE54079.2021.9605461}}
+  doi={10.1109/LARS/SBR/WRE54079.2021.9605461}
+}
 ```
 
 ```
